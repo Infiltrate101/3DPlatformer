@@ -1,24 +1,31 @@
 using NUnit.Framework.Constraints;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovementScript : MonoBehaviour
 {
     public Rigidbody rb;
-    public float moveSpeed;
-    public float sprintSpeed;
+    public float speed;
     public float rotateSpeed;
     public float jumpHeight;
     public InputActionReference move;
     public InputActionReference jump;
     public InputActionReference sprint;
     public Animator animator;
+    public float timer;
     
     private Vector3 _moveDirection;
     private bool _isGrounded;
     private bool _jumpPressed;
-    private bool _isSprinting;
-    
+    private bool _canWallJump;
+
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     private void Update()
     {
         Vector2 input = move.action.ReadValue<Vector2>();
@@ -48,15 +55,42 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (jump.action.WasPressedThisFrame() && _isGrounded)
             _jumpPressed = true;
-        
-        _isSprinting = sprint.action.IsPressed() && _isGrounded;
-        animator.SetBool("isSprinting", _isSprinting);
     }
 
     private void FixedUpdate()
     {
-        float speed = _isSprinting ? sprintSpeed : moveSpeed;
-        
+        if (timer > 10)
+        {
+            if (sprint.action.IsPressed() && _isGrounded)
+            {
+                speed += 2f;
+            }
+            else if (speed < 6)
+            {
+                speed = 5;
+            }
+            else
+            {
+                speed -= 2f;
+            }
+
+            if (speed > 15 && animator.GetBool("isWalking"))
+            {
+                animator.SetBool("isSprinting", true);
+            }
+            else
+            {
+                animator.SetBool("isSprinting", false);
+            }
+
+            timer = 0;
+        }
+        else
+        {
+            timer += 1;
+        }
+
+
         rb.linearVelocity = new Vector3(
             _moveDirection.x * speed,
             rb.linearVelocity.y,
@@ -76,12 +110,23 @@ public class PlayerMovementScript : MonoBehaviour
             animator.SetBool("isWalking", false);
         }
 
-        if (_jumpPressed && _isGrounded)
+        if (_jumpPressed && _isGrounded || _canWallJump && jump.action.WasPressedThisFrame())
         {
-            rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * (jumpHeight + (speed/5)), ForceMode.Impulse);
             _isGrounded = false;
             _jumpPressed = false;
             animator.SetBool("jumpRequested", true);
+
+            if (_canWallJump)
+            {
+                speed += 10f;
+                var rotation = transform.rotation;
+                rotation.y = rotation.y - 180f;
+                transform.rotation = rotation;
+                rb.AddForce(Vector3.forward * (jumpHeight + (speed/5)), ForceMode.Impulse);
+                _canWallJump = false;
+                Debug.Log(_canWallJump);
+            }
         }
 
         if (rb.linearVelocity.y < 0)
@@ -96,6 +141,11 @@ public class PlayerMovementScript : MonoBehaviour
         {
             _isGrounded = true;
             animator.SetBool("isGrounded", true);
+        }
+
+        if (collision.gameObject.tag == ("Wall"))
+        {
+            _canWallJump = true;
         }
     }
 
