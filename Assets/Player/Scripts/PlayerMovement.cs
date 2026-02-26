@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,35 +6,62 @@ namespace Player.Scripts
 {
     public class PlayerMovement : MonoBehaviour
     {
-        [Header("Movement")]
-        public float speed;
+        [Header("Movement")] 
+        public float walkSpeed;
+        public float sprintSpeed;
         public float groundDrag;
-        public float jumpForce;
-        public float jumpCooldown;
-        public float airMultiplier;
         public Transform orientation;
-        public InputActionReference move;
-        public InputActionReference jump;
-
-        [Header("Ground Check")] 
-        public float playerHeight;
-        public LayerMask whatIsGround;
-
+        public MovementState movementState;
+        
+        private float _speed;
         private float _horizontalInput;
         private float _verticalInput;
         private Vector3 _moveDirection;
         private Rigidbody _rb;
-        private bool _isGrounded;
+
+        [Header("Jump")]
+        public float jumpForce;
+        public float jumpCooldown;
+        public float airMultiplier;
         private bool _readyToJump;
-    
+
+        [Header("Crouch")] 
+        public float crouchSpeed;
+        public float crouchYScale;
+        private float _startYScale;
+        
+        [Header("Keybindings")]
+        public InputActionReference move;
+        public InputActionReference sprint;
+        public InputActionReference jump;
+        public InputActionReference crouch;
+
+        [Header("Ground Check")] 
+        public float playerHeight;
+        public LayerMask whatIsGround;
+        private bool _isGrounded;
+
+        public enum MovementState
+        {
+            Walking,
+            Sprinting,
+            Crouching,
+            Air
+        }
 
         private void Start()
         {
-            _rb = GetComponent<Rigidbody>();
-            _rb.freezeRotation = true;
             move.action.Enable();
             jump.action.Enable();
+            sprint.action.Enable();
+            crouch.action.Enable();
+            
+            _rb = GetComponent<Rigidbody>();
+            _rb.freezeRotation = true;
+            
             _readyToJump = true;
+            
+            _startYScale = transform.localScale.y;
         }
 
         private void Update()
@@ -44,14 +72,13 @@ namespace Player.Scripts
         
             MyInput();
             SpeedControl();
+            StateHandler();
         
             //Drag
             if (_isGrounded)
                 _rb.linearDamping = groundDrag;
             else
                 _rb.linearDamping = 0;
-            
-            Debug.Log(_isGrounded);
         }
 
         private void FixedUpdate()
@@ -67,11 +94,51 @@ namespace Player.Scripts
             _horizontalInput = input.x;
             _verticalInput = input.y;
 
-            if (jump.action.WasPressedThisFrame() && _readyToJump && _isGrounded)
+            //Jump
+            if (jump.action.IsPressed() && _readyToJump && _isGrounded)
             {
                 _readyToJump = false;
                 Jump();
                 Invoke(nameof(ResetJump), jumpCooldown);
+            }
+            
+            //Crouch
+            if (crouch.action.WasPressedThisFrame())
+            {
+                transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+                _rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
+            }
+
+            if (crouch.action.WasReleasedThisFrame())
+            {
+                transform.localScale = new Vector3(transform.localScale.x, _startYScale, transform.localScale.z);
+            }
+        }
+
+        private void StateHandler()
+        {
+            if (crouch.action.IsPressed())
+            {
+                movementState = MovementState.Crouching;
+                _speed = crouchSpeed;
+            }
+
+            //Sprint Mode
+            else if (_isGrounded && sprint.action.IsPressed())
+            {
+                movementState = MovementState.Sprinting;
+                _speed = sprintSpeed;
+            }
+            //Walk Mode
+            else if (_isGrounded)
+            {
+                movementState = MovementState.Walking;
+                _speed = walkSpeed;
+            }
+            //Air Mode
+            else
+            {
+                movementState = MovementState.Air;
             }
         }
 
@@ -83,11 +150,11 @@ namespace Player.Scripts
             {
                 //On ground
                 case true:
-                    _rb.AddForce(_moveDirection.normalized * (speed * 10f), ForceMode.Force);
+                    _rb.AddForce(_moveDirection.normalized * (_speed * 10f), ForceMode.Force);
                     break;
                 //In air
                 case false:
-                    _rb.AddForce(_moveDirection.normalized * (speed * 10f * airMultiplier), ForceMode.Force);
+                    _rb.AddForce(_moveDirection.normalized * (_speed * 10f * airMultiplier), ForceMode.Force);
                     break;
             }
         }
@@ -97,9 +164,9 @@ namespace Player.Scripts
             Vector3 flatVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
             //Limit velocity
-            if (flatVelocity.magnitude > speed)
+            if (flatVelocity.magnitude > _speed)
             {
-                Vector3 limitedVelocity = flatVelocity.normalized * speed;
+                Vector3 limitedVelocity = flatVelocity.normalized * _speed;
                 _rb.linearVelocity = new Vector3(limitedVelocity.x, _rb.linearVelocity.y, limitedVelocity.z);
             }
         }
