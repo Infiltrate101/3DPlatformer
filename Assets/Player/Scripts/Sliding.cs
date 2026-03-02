@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class SlidingMovementScript : MonoBehaviour
+public class Sliding : MonoBehaviour
 {
     [Header("References")]
     public Transform orientation;
