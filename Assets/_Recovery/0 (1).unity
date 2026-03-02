@@ -192,16 +192,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 203471051}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4eec21a50917af4d8c95ca90e4e9639, type: 3}
+  m_Script: {fileID: 11500000, guid: 22f2c8f20382d7a41ba27b9546927213, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Sliding
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerSlidingMovement
   orientation: {fileID: 2034328168}
   playerObj: {fileID: 1522891414}
   maxSlideTime: 0.75
   slideForce: 200
-  slideYScale: 0.5
-  slideAction: {fileID: 7544545387081651935, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
-  moveAction: {fileID: -3594788830379947683, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
+  slideYScale: 1
+  slide: {fileID: 7544545387081651935, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
+  move: {fileID: -3594788830379947683, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
 --- !u!114 &203471055
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211,32 +211,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 203471051}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 582892510b9bee04fbec32f714e2dcb7, type: 3}
+  m_Script: {fileID: 11500000, guid: f2455f244770c2c49a7159bd9475eeac, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementAdvanced
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerMovement
   walkSpeed: 10
   sprintSpeed: 20
-  slideSpeed: 9999
-  speedIncreaseMultiplier: 1.5
-  slopeIncreaseMultiplier: 4
+  slideSpeed: 20
   groundDrag: 4
-  jumpForce: 15
+  speedIncreaseMultiplier: 1.5
+  slopeIncreaseMultiplier: 2.5
+  sliding: 0
+  orientation: {fileID: 2034328168}
+  movementState: 0
+  jumpForce: 20
   jumpCooldown: 0.25
   airMultiplier: 0.5
-  crouchSpeed: 7
-  crouchYScale: 0.5
-  moveAction: {fileID: -3594788830379947683, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
-  jumpAction: {fileID: 3621838852653895685, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
-  sprintAction: {fileID: 4754849093958420281, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
-  crouchAction: {fileID: -7278798051763968130, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
+  crouchSpeed: 4
+  crouchYScale: 1
+  move: {fileID: -3594788830379947683, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
+  sprint: {fileID: 4754849093958420281, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
+  jump: {fileID: 3621838852653895685, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
+  crouch: {fileID: -7278798051763968130, guid: be4bf0df7f4a5964faa564b124cf1815, type: 3}
   playerHeight: 2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 64
-  maxSlopeAngle: 40
-  orientation: {fileID: 2034328168}
-  state: 0
-  sliding: 0
+  maxSlopeAngle: 45
 --- !u!1 &488555645
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,7 +471,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -194.52, y: 65.85, z: -15.6}
-  m_LocalScale: {x: 13.408148, y: 1.525553, z: 25.823593}
+  m_LocalScale: {x: 9.8106, y: 1.525553, z: 41.112514}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1029,13 +1029,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1383218432}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0.29344237, w: 0.9559768}
+  m_LocalRotation: {x: -0, y: -0, z: -0.38119182, w: 0.924496}
   m_LocalPosition: {x: -165, y: 33.8, z: -35.1}
   m_LocalScale: {x: 153.30765, y: 1.525553, z: 14.43}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -34.128}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -44.815}
 --- !u!1 &1453551409
 GameObject:
   m_ObjectHideFlags: 0
@@ -1473,7 +1473,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -22.43, y: 2.61, z: 0.38696}
-  m_LocalScale: {x: 12.168088, y: 1.525553, z: 14.43}
+  m_LocalScale: {x: 9.8106, y: 1.525553, z: 14.43}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
