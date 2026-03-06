@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 public class PlayerCam : MonoBehaviour
 {
     public float sensX;
     public float sensY;
     public Transform orientation;
+    public Transform camHolder;
     public InputActionReference look;
     
     private float _xRotation;
@@ -33,7 +35,17 @@ public class PlayerCam : MonoBehaviour
         _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
         
         //Rotate camera and orientation
-        transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
+        camHolder.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
         orientation.rotation = Quaternion.Euler(0f, _yRotation, 0f);
+    }
+
+    public void DoFov(float endValue)
+    {
+        GetComponent<Camera>().DOFieldOfView(endValue, 0.25f);
+    }
+
+    public void DoTilt(float zTilt)
+    {
+        transform.DOLocalRotate(new Vector3(0f, 0f, zTilt), 0.25f);
     }
 }
