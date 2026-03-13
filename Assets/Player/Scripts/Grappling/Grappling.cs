@@ -9,9 +9,8 @@ namespace Player.Scripts.Grappling
         [Header("References")] 
         public Transform cam;
         public Transform gunTip;
-        public LayerMask whatIsGrappleable;
         public LineRenderer lr;
-        public Swinging swinging;
+        public LayerMask whatIsGrappleable;
     
         private PlayerMovement _pm;
 
@@ -60,10 +59,11 @@ namespace Player.Scripts.Grappling
             _isGrappling = true;
 
             grappleAction.action.Disable();
-        
-            if (swinging.PredictionHit.point != Vector3.zero)
+
+            RaycastHit hit;
+            if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
             {
-                _grapplePoint = swinging.PredictionHit.point;
+                _grapplePoint = hit.point;
                 Invoke(nameof(ExecuteGrapple), grappleDelayTime);
             }
             else
